@@ -40,4 +40,5 @@ export type Message = {
   content: string;
   timestamp: Date;
   sources?: ChunkResponse[];
+  expanded_queries?: string[];
 }; 

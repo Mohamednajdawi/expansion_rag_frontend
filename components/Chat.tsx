@@ -53,6 +53,7 @@ export default function Chat() {
   const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
   const [temperature, setTemperature] = useState(0);
   const [expandedSources, setExpandedSources] = useState<string[]>([]);
+  const [expandedQueries, setExpandedQueries] = useState<string[]>([]);
   const [showSidebar, setShowSidebar] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
@@ -213,6 +214,7 @@ export default function Chat() {
         content: data.answer,
         timestamp: new Date(),
         sources: data.chunks,
+        expanded_queries: data.expanded_queries,
       };
 
       setConversations(prev => prev.map(conv => {
@@ -284,6 +286,14 @@ export default function Chat() {
   const toggleSources = (messageId: string) => {
     setExpandedSources(prev => 
       prev.includes(messageId) 
+        ? prev.filter(id => id !== messageId)
+        : [...prev, messageId]
+    );
+  };
+
+  const toggleExpandedQueries = (messageId: string) => {
+    setExpandedQueries(prev =>
+      prev.includes(messageId)
         ? prev.filter(id => id !== messageId)
         : [...prev, messageId]
     );
@@ -598,7 +608,7 @@ export default function Chat() {
                   {formatTimestamp(new Date(message.timestamp))}
                 </div>
                 {message.sources && message.sources.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-gray-200/20">
+                  <div className="mt-3 pt-3 border-t border-gray-200/20 dark:border-gray-700/50">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -621,6 +631,36 @@ export default function Chat() {
                             className="text-xs bg-black/5 dark:bg-white/5 p-3 rounded-lg leading-relaxed"
                           >
                             {source.text}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {message.expanded_queries && message.expanded_queries.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-200/20 dark:border-gray-700/50">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleExpandedQueries(message.id);
+                      }}
+                      className="flex items-center text-xs opacity-70 hover:opacity-100 transition-colors duration-200"
+                    >
+                      {expandedQueries.includes(message.id) ? (
+                        <ChevronUp className="w-4 h-4 mr-1" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 mr-1" />
+                      )}
+                      {message.expanded_queries.length} Expanded {message.expanded_queries.length === 1 ? 'Query' : 'Queries'}
+                    </button>
+                    {expandedQueries.includes(message.id) && (
+                      <div className="mt-2 space-y-2 animate-slideDown">
+                        {message.expanded_queries.map((query, index) => (
+                          <div
+                            key={`${message.id}-query-${index}`}
+                            className="text-xs bg-black/5 dark:bg-white/5 p-3 rounded-lg leading-relaxed italic"
+                          >
+                            "{query}"
                           </div>
                         ))}
                       </div>

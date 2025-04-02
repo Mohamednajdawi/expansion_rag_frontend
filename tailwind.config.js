@@ -27,6 +27,9 @@ module.exports = {
           '100%': { opacity: '1', transform: 'translateX(0)' },
         },
       },
+      fontSize: {
+        'xxs': '0.625rem', // 10px when base is 16px
+      },
     },
   },
   plugins: [],

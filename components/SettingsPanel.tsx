@@ -10,6 +10,8 @@ interface SettingsPanelProps {
   onModelChange: (model: string) => void;
   temperature: number;
   onTemperatureChange: (temp: number) => void;
+  topK: number;
+  onTopKChange: (k: number) => void;
   models: ModelOption[];
 }
 
@@ -18,6 +20,8 @@ export default function SettingsPanel({
   onModelChange,
   temperature,
   onTemperatureChange,
+  topK,
+  onTopKChange,
   models
 }: SettingsPanelProps) {
   return (
@@ -48,6 +52,20 @@ export default function SettingsPanel({
             step="0.1"
             value={temperature}
             onChange={(e) => onTemperatureChange(parseFloat(e.target.value))}
+            className="w-full accent-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            Retrieved Documents (Top K): {topK}
+          </label>
+          <input
+            type="range"
+            min="1"
+            max="10"
+            step="1"
+            value={topK}
+            onChange={(e) => onTopKChange(parseInt(e.target.value, 10))}
             className="w-full accent-blue-500"
           />
         </div>

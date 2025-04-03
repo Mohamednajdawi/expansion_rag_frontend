@@ -7,6 +7,7 @@ const API_URL = 'http://localhost:8000/qa';
 export interface ChatApiOptions {
   model: string;
   temperature: number;
+  topK: number;
   onSuccess?: (message: Message) => void;
   onError?: (message: Message) => void;
 }
@@ -28,7 +29,7 @@ export function useChatApi() {
         },
         body: JSON.stringify({
           query: userQuery,
-          top_k: 3,
+          top_k: options.topK,
           model: options.model,
           temperature: options.temperature,
         } as QARequest),

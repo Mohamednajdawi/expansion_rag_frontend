@@ -36,6 +36,7 @@ export default function Chat() {
   const [showUploadArea, setShowUploadArea] = useState(false);
   const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
   const [temperature, setTemperature] = useState(0);
+  const [topK, setTopK] = useState(3);
 
   // Custom hooks
   const { isDarkMode, toggleDarkMode } = useTheme();
@@ -76,6 +77,7 @@ export default function Chat() {
     await sendMessage(content, {
       model: selectedModel,
       temperature,
+      topK: topK,
       onSuccess: (assistantMessage) => {
         addMessageToConversation(currentConversationId, assistantMessage);
         scrollToBottom();
@@ -138,6 +140,8 @@ export default function Chat() {
             temperature={temperature}
             onTemperatureChange={setTemperature}
             models={MODELS}
+            topK={topK}
+            onTopKChange={setTopK}
           />
         )}
 

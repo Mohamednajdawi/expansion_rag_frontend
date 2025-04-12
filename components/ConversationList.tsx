@@ -43,10 +43,16 @@ export default function ConversationList({
             <MessageSquare className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                {conversation.title}
+                {conversation.title || 'New Chat'}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {formatDate(conversation.lastUpdated)}
+              <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                <span>{formatDate(conversation.lastUpdated)}</span>
+                {conversation.messages.length > 0 && (
+                  <>
+                    <span>•</span>
+                    <span>{conversation.messages.length} message{conversation.messages.length !== 1 ? 's' : ''}</span>
+                  </>
+                )}
               </div>
             </div>
             <button

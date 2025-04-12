@@ -1,6 +1,7 @@
 'use client';
 
 import { Settings, Trash, Download, Sun, Moon, FileText } from 'lucide-react';
+import EditableChatTitle from './EditableChatTitle';
 
 interface HeaderProps {
   onToggleSettings: () => void;
@@ -9,6 +10,8 @@ interface HeaderProps {
   onEditMetaInfo: () => void;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
+  title: string;
+  onUpdateTitle: (newTitle: string) => void;
 }
 
 export default function Header({
@@ -17,12 +20,14 @@ export default function Header({
   onExportChat,
   onEditMetaInfo,
   isDarkMode,
-  onToggleDarkMode
+  onToggleDarkMode,
+  title,
+  onUpdateTitle
 }: HeaderProps) {
   return (
     <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-      <div className="flex items-center">
-        <h1 className="text-lg font-semibold text-gray-800 dark:text-white">ExpanRAG Chat</h1>
+      <div className="flex items-center min-w-0 flex-1">
+        <EditableChatTitle title={title} onSave={onUpdateTitle} />
       </div>
       
       <div className="flex items-center space-x-1">

@@ -46,7 +46,7 @@ export default function Chat() {
 
   // Custom hooks
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const { conversations, currentConversationId, currentConversation, setCurrentConversationId, createNewConversation, deleteConversation, addMessageToConversation, clearCurrentConversation, updateConversationMetaInformation } = useConversations();
+  const { conversations, currentConversationId, currentConversation, setCurrentConversationId, createNewConversation, deleteConversation, addMessageToConversation, clearCurrentConversation, updateConversationMetaInformation, updateConversationTitle } = useConversations();
   const { uploadedFiles, isUploading, uploadFiles, deleteFile, deleteFileFromKnowledgeBase, updateFileCategory, categories } = useFileUpload();
   const { sendMessage, isLoading } = useChatApi();
 
@@ -70,6 +70,13 @@ export default function Chat() {
   const handleUpdateMetaInfo = (metaInfo: string) => {
     if (currentConversationId) {
       updateConversationMetaInformation(currentConversationId, metaInfo);
+    }
+  };
+
+  // Add handleUpdateTitle function
+  const handleUpdateTitle = (newTitle: string) => {
+    if (currentConversationId) {
+      updateConversationTitle(currentConversationId, newTitle);
     }
   };
 
@@ -156,6 +163,8 @@ export default function Chat() {
           }}
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleDarkMode}
+          title={currentConversation?.title || 'New Chat'}
+          onUpdateTitle={handleUpdateTitle}
         />
 
         {/* Settings Panel */}

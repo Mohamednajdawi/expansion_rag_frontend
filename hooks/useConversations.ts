@@ -47,12 +47,12 @@ export function useConversations() {
     return newConversation.id;
   };
 
-  const updateConversationTitle = (conversationId: string, firstMessage: string) => {
+  const updateConversationTitle = (conversationId: string, title: string) => {
     setConversations(prev => prev.map(conv => {
       if (conv.id === conversationId) {
         return {
           ...conv,
-          title: firstMessage.slice(0, 30) + (firstMessage.length > 30 ? '...' : ''),
+          title: title.trim() ? title : 'New Chat',
         };
       }
       return conv;
@@ -85,7 +85,8 @@ export function useConversations() {
         const updatedMessages = [...conv.messages, message];
         // Update title if this is the first message and the message is from the user
         if (conv.messages.length === 0 && message.role === 'user') {
-          updateConversationTitle(conv.id, message.content);
+          const newTitle = message.content.slice(0, 30) + (message.content.length > 30 ? '...' : '');
+          updateConversationTitle(conv.id, newTitle);
         }
         return {
           ...conv,
@@ -132,6 +133,7 @@ export function useConversations() {
     addMessageToConversation,
     clearConversations,
     clearCurrentConversation,
-    updateConversationMetaInformation
+    updateConversationMetaInformation,
+    updateConversationTitle
   };
 } 

@@ -74,19 +74,23 @@ export default function Chat() {
     addMessageToConversation(currentConversationId, userMessage);
 
     // Send to API and handle response
-    await sendMessage(content, {
-      model: selectedModel,
-      temperature,
-      topK: topK,
-      onSuccess: (assistantMessage) => {
-        addMessageToConversation(currentConversationId, assistantMessage);
-        scrollToBottom();
-      },
-      onError: (errorMessage) => {
-        addMessageToConversation(currentConversationId, errorMessage);
-        scrollToBottom();
+    await sendMessage(
+      content, 
+      currentConversation?.messages, // Pass the current conversation messages as history
+      {
+        model: selectedModel,
+        temperature,
+        topK: topK,
+        onSuccess: (assistantMessage) => {
+          addMessageToConversation(currentConversationId, assistantMessage);
+          scrollToBottom();
+        },
+        onError: (errorMessage) => {
+          addMessageToConversation(currentConversationId, errorMessage);
+          scrollToBottom();
+        }
       }
-    });
+    );
   };
 
   // Handle file category update

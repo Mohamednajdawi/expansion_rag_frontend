@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { ChevronDown, ChevronUp, File, FileText, Loader2, X, Filter, Trash, Edit, Check } from 'lucide-react';
 import { DocumentCategory, ProcessingStatus, UploadedFile } from '../hooks/useFileUpload';
+import { useFileList } from '../hooks/useFileList';
 import { formatDate, formatFileSize } from '../utils/formatters';
 
 interface FileUploaderProps {
@@ -33,6 +34,8 @@ export default function FileUploader({
   const [filterCategory, setFilterCategory] = useState<DocumentCategory | 'all'>('all');
   const [editingFile, setEditingFile] = useState<string | null>(null);
   const [editCategory, setEditCategory] = useState<DocumentCategory>('general');
+  
+  const { files: knowledgeBaseFiles, isLoading: isLoadingFiles, error: filesError, refresh: refreshFiles } = useFileList();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -117,106 +120,49 @@ export default function FileUploader({
             </p>
           </div>
 
-          {/* Filter files by category */}
-          <div className="mt-6 mb-2 flex items-center">
-            <div className="flex-1">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Documents</h3>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-400" />
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value as DocumentCategory | 'all')}
-                className="text-xs p-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+          {/* Knowledge Base Files Section */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Knowledge Base Files</h3>
+              <button
+                onClick={refreshFiles}
+                className="text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
               >
-                <option value="all">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </option>
-                ))}
-              </select>
+                Refresh
+              </button>
             </div>
-          </div>
-
-          {/* Uploaded files list */}
-          <div className="mt-2 space-y-2">
-            {isUploading && (
-              <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg animate-pulse">
+            
+            {isLoadingFiles ? (
+              <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                <span className="text-sm text-gray-600 dark:text-gray-300">Uploading...</span>
+                <span className="text-sm text-gray-600 dark:text-gray-300">Loading files...</span>
               </div>
-            )}
-            
-            {filteredFiles.length === 0 && !isUploading && (
+            ) : filesError ? (
+              <div className="p-2 text-sm text-red-500 dark:text-red-400">
+                Error loading files: {filesError}
+              </div>
+            ) : knowledgeBaseFiles.length === 0 ? (
               <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                No documents found in this category
+                No files in knowledge base
               </div>
-            )}
-            
-            {filteredFiles.map((file) => (
-              <div
-                key={file.id}
-                className="flex flex-col p-3 bg-gray-50 dark:bg-gray-700 rounded-lg group animate-slideIn"
-              >
-                <div className="flex items-center gap-2">
-                  <File className={`w-4 h-4 ${file.success ? 'text-green-500' : 'text-red-500'}`} />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm text-gray-900 dark:text-white truncate">
-                      {file.name}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 flex-wrap">
-                      <span>{formatFileSize(file.size)}</span>
-                      <span>•</span>
-                      <span>{formatDate(file.uploadDate)}</span>
-                      
-                      {/* Category badge */}
-                      <span className="px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-xxs">
-                        {file.category.charAt(0).toUpperCase() + file.category.slice(1)}
-                      </span>
-                      
-                      {/* Status badge */}
-                      <span className={`px-2 py-0.5 rounded-full text-xxs ${getStatusColor(file.processingStatus)}`}>
-                        {file.processingStatus.charAt(0).toUpperCase() + file.processingStatus.slice(1)}
+            ) : (
+              <div className="space-y-2">
+                {knowledgeBaseFiles.map((filename) => (
+                  <div
+                    key={filename}
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      <File className="w-4 h-4 text-green-500" />
+                      <span className="text-sm text-gray-900 dark:text-white truncate">
+                        {filename}
                       </span>
                     </div>
-                  </div>
-                  
-                  {/* Actions */}
-                  <div className="flex items-center space-x-1">
-                    {/* Edit category button */}
-                    {editingFile !== file.id ? (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingFile(file.id);
-                          setEditCategory(file.category);
-                        }}
-                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                        aria-label="Edit category"
-                      >
-                        <Edit className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onUpdateCategory(file.id, editCategory);
-                          setEditingFile(null);
-                        }}
-                        className="p-1 rounded hover:bg-green-100 dark:hover:bg-green-800 transition-colors"
-                        aria-label="Save category"
-                      >
-                        <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
-                      </button>
-                    )}
-                    
-                    {/* Delete from knowledge base button */}
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm('Are you sure you want to remove this document from the knowledge base? This cannot be undone.')) {
-                          onDeleteFromKnowledgeBase(file.id);
+                      onClick={() => {
+                        if (confirm('Are you sure you want to remove this file from the knowledge base?')) {
+                          // TODO: Implement delete from knowledge base
+                          console.log('Delete file:', filename);
                         }
                       }}
                       className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
@@ -224,39 +170,151 @@ export default function FileUploader({
                     >
                       <Trash className="w-4 h-4 text-red-500 dark:text-red-400" />
                     </button>
-                    
-                    {/* Delete locally button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(file.id);
-                      }}
-                      className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                      aria-label="Remove from list"
-                    >
-                      <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                    </button>
                   </div>
-                </div>
-                
-                {/* Edit category dropdown (when editing) */}
-                {editingFile === file.id && (
-                  <div className="mt-2 pl-6">
-                    <select
-                      value={editCategory}
-                      onChange={(e) => setEditCategory(e.target.value as DocumentCategory)}
-                      className="text-xs p-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-white w-full focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    >
-                      {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {category.charAt(0).toUpperCase() + category.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                ))}
               </div>
-            ))}
+            )}
+          </div>
+
+          {/* Uploaded Files Section */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Documents</h3>
+              <div className="flex items-center space-x-2">
+                <Filter className="w-4 h-4 text-gray-400" />
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value as DocumentCategory | 'all')}
+                  className="text-xs p-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="all">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {isUploading && (
+                <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg animate-pulse">
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                  <span className="text-sm text-gray-600 dark:text-gray-300">Uploading...</span>
+                </div>
+              )}
+              
+              {filteredFiles.length === 0 && !isUploading && (
+                <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                  No documents found in this category
+                </div>
+              )}
+              
+              {filteredFiles.map((file) => (
+                <div
+                  key={file.id}
+                  className="flex flex-col p-3 bg-gray-50 dark:bg-gray-700 rounded-lg group animate-slideIn"
+                >
+                  <div className="flex items-center gap-2">
+                    <File className={`w-4 h-4 ${file.success ? 'text-green-500' : 'text-red-500'}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-gray-900 dark:text-white truncate">
+                        {file.name}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 flex-wrap">
+                        <span>{formatFileSize(file.size)}</span>
+                        <span>•</span>
+                        <span>{formatDate(file.uploadDate)}</span>
+                        
+                        {/* Category badge */}
+                        <span className="px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-xxs">
+                          {file.category.charAt(0).toUpperCase() + file.category.slice(1)}
+                        </span>
+                        
+                        {/* Status badge */}
+                        <span className={`px-2 py-0.5 rounded-full text-xxs ${getStatusColor(file.processingStatus)}`}>
+                          {file.processingStatus.charAt(0).toUpperCase() + file.processingStatus.slice(1)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Actions */}
+                    <div className="flex items-center space-x-1">
+                      {/* Edit category button */}
+                      {editingFile !== file.id ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingFile(file.id);
+                            setEditCategory(file.category);
+                          }}
+                          className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                          aria-label="Edit category"
+                        >
+                          <Edit className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onUpdateCategory(file.id, editCategory);
+                            setEditingFile(null);
+                          }}
+                          className="p-1 rounded hover:bg-green-100 dark:hover:bg-green-800 transition-colors"
+                          aria-label="Save category"
+                        >
+                          <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        </button>
+                      )}
+                      
+                      {/* Delete from knowledge base button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm('Are you sure you want to remove this document from the knowledge base? This cannot be undone.')) {
+                            onDeleteFromKnowledgeBase(file.id);
+                          }
+                        }}
+                        className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
+                        aria-label="Remove from knowledge base"
+                      >
+                        <Trash className="w-4 h-4 text-red-500 dark:text-red-400" />
+                      </button>
+                      
+                      {/* Delete locally button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(file.id);
+                        }}
+                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        aria-label="Remove from list"
+                      >
+                        <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Edit category dropdown (when editing) */}
+                  {editingFile === file.id && (
+                    <div className="mt-2 pl-6">
+                      <select
+                        value={editCategory}
+                        onChange={(e) => setEditCategory(e.target.value as DocumentCategory)}
+                        className="text-xs p-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-white w-full focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        {categories.map((category) => (
+                          <option key={category} value={category}>
+                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

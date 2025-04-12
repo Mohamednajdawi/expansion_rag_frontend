@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Message, QARequest, QAResponse } from '../types/api';
+import { Message, QARequest, QAResponse, ChatRequest, ChatResponse, ChunkResponse } from '../types/api';
 
-const API_URL = 'http://localhost:8000/qa';
+const API_URL = 'http://localhost:8000/chat/process';
 
 export interface ChatApiOptions {
   model: string;
@@ -15,7 +15,7 @@ export interface ChatApiOptions {
 export function useChatApi() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const sendMessage = async (userQuery: string, options: ChatApiOptions) => {
+  const sendMessage = async (userQuery: string, history: Message[] | undefined, options: ChatApiOptions) => {
     if (!userQuery.trim()) return;
     
     setIsLoading(true);
@@ -28,27 +28,28 @@ export function useChatApi() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: userQuery,
+          message: userQuery,
+          history: history,
           top_k: options.topK,
           model: options.model,
           temperature: options.temperature,
-        } as QARequest),
+        } as ChatRequest),
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: QAResponse = await response.json();
+      const data: ChatResponse = await response.json();
 
       if (!data.success) {
-        throw new Error(data.answer || 'Failed to get response');
+        throw new Error(data.message?.content || 'Failed to get response');
       }
 
       const assistantMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: data.answer,
+        content: data.message.content,
         timestamp: new Date(),
         sources: data.chunks,
         expanded_queries: data.expanded_queries,

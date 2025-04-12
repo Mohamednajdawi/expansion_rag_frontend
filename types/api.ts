@@ -34,6 +34,21 @@ export interface QAResponse {
   success: boolean;
 }
 
+export interface ChatRequest {
+  message: string;
+  history?: Message[];
+  top_k?: number;
+  model?: string;
+  temperature?: number;
+}
+
+export interface ChatResponse {
+  message: Message;
+  chunks: ChunkResponse[];
+  expanded_queries: string[];
+  success: boolean;
+}
+
 export type Message = {
   id: string;
   role: 'user' | 'assistant';

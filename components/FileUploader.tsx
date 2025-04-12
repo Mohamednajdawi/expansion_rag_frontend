@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { ChevronDown, ChevronUp, File, FileText, Loader2, X, Filter, Trash, Edit, Check } from 'lucide-react';
 import { DocumentCategory, ProcessingStatus, UploadedFile } from '../hooks/useFileUpload';
-import { useFileList } from '../hooks/useFileList';
+import { useFileList, KnowledgeBaseFile } from '../hooks/useFileList';
 import { formatDate, formatFileSize } from '../utils/formatters';
 
 interface FileUploaderProps {
@@ -35,7 +35,7 @@ export default function FileUploader({
   const [editingFile, setEditingFile] = useState<string | null>(null);
   const [editCategory, setEditCategory] = useState<DocumentCategory>('general');
   
-  const { files: knowledgeBaseFiles, isLoading: isLoadingFiles, error: filesError, refresh: refreshFiles } = useFileList();
+  const { files, isLoading: isLoadingFiles, error: filesError, refresh: refreshFiles } = useFileList();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -122,53 +122,71 @@ export default function FileUploader({
 
           {/* Knowledge Base Files Section */}
           <div className="mt-6">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Knowledge Base Files</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-base text-gray-800 dark:text-gray-200">Knowledge Base Files</h3>
               <button
                 onClick={refreshFiles}
-                className="text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                className="flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-800/50 transition-colors"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
                 Refresh
               </button>
             </div>
             
             {isLoadingFiles ? (
-              <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+              <div className="flex items-center justify-center gap-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
+                <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
                 <span className="text-sm text-gray-600 dark:text-gray-300">Loading files...</span>
               </div>
             ) : filesError ? (
-              <div className="p-2 text-sm text-red-500 dark:text-red-400">
+              <div className="p-3 text-sm text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800/30">
                 Error loading files: {filesError}
               </div>
-            ) : knowledgeBaseFiles.length === 0 ? (
-              <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                No files in knowledge base
+            ) : files.length === 0 ? (
+              <div className="p-6 text-center bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
+                <FileText className="w-10 h-10 mx-auto mb-2 text-gray-300 dark:text-gray-600" />
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  No files in knowledge base
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  Upload files to get started
+                </p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {knowledgeBaseFiles.map((filename) => (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {files.map((file) => (
                   <div
-                    key={filename}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                    key={file.id}
+                    className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 hover:shadow-sm transition-all duration-200"
                   >
-                    <div className="flex items-center gap-2">
-                      <File className="w-4 h-4 text-green-500" />
-                      <span className="text-sm text-gray-900 dark:text-white truncate">
-                        {filename}
-                      </span>
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <div className="p-1.5 rounded-md bg-emerald-50 dark:bg-emerald-900/30">
+                        <File className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                      </div>
+                      <div className="overflow-hidden">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate max-w-[150px]">
+                          {file.name}
+                        </p>
+                        {file.dateAdded && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Added {new Date(file.dateAdded).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <button
                       onClick={() => {
                         if (confirm('Are you sure you want to remove this file from the knowledge base?')) {
-                          // TODO: Implement delete from knowledge base
-                          console.log('Delete file:', filename);
+                          onDeleteFromKnowledgeBase(file.originalName);
                         }
                       }}
-                      className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
+                      className="p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors"
                       aria-label="Remove from knowledge base"
                     >
-                      <Trash className="w-4 h-4 text-red-500 dark:text-red-400" />
+                      <Trash className="w-4 h-4" />
                     </button>
                   </div>
                 ))}

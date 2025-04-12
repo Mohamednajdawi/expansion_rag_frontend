@@ -40,6 +40,7 @@ export interface ChatRequest {
   top_k?: number;
   model?: string;
   temperature?: number;
+  meta_information?: string;
 }
 
 export interface ChatResponse {

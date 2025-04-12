@@ -8,6 +8,7 @@ export interface ChatApiOptions {
   model: string;
   temperature: number;
   topK: number;
+  metaInformation?: string;
   onSuccess?: (message: Message) => void;
   onError?: (message: Message) => void;
 }
@@ -33,6 +34,7 @@ export function useChatApi() {
           top_k: options.topK,
           model: options.model,
           temperature: options.temperature,
+          meta_information: options.metaInformation
         } as ChatRequest),
       });
 

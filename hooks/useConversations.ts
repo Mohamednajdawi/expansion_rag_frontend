@@ -7,6 +7,7 @@ export interface Conversation {
   title: string;
   messages: Message[];
   lastUpdated: Date;
+  metaInformation?: string;
 }
 
 export function useConversations() {
@@ -39,6 +40,7 @@ export function useConversations() {
       title: 'New Chat',
       messages: [],
       lastUpdated: new Date(),
+      metaInformation: ''
     };
     setConversations(prev => [newConversation, ...prev]);
     setCurrentConversationId(newConversation.id);
@@ -51,6 +53,18 @@ export function useConversations() {
         return {
           ...conv,
           title: firstMessage.slice(0, 30) + (firstMessage.length > 30 ? '...' : ''),
+        };
+      }
+      return conv;
+    }));
+  };
+
+  const updateConversationMetaInformation = (conversationId: string, metaInformation: string) => {
+    setConversations(prev => prev.map(conv => {
+      if (conv.id === conversationId) {
+        return {
+          ...conv,
+          metaInformation,
         };
       }
       return conv;
@@ -117,6 +131,7 @@ export function useConversations() {
     deleteConversation,
     addMessageToConversation,
     clearConversations,
-    clearCurrentConversation
+    clearCurrentConversation,
+    updateConversationMetaInformation
   };
 } 

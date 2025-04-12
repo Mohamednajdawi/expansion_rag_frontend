@@ -1,11 +1,12 @@
 'use client';
 
-import { Settings, Trash2, Download, Sun, Moon } from 'lucide-react';
+import { Settings, Trash, Download, Sun, Moon, FileText } from 'lucide-react';
 
 interface HeaderProps {
   onToggleSettings: () => void;
   onClearChat: () => void;
   onExportChat: () => void;
+  onEditMetaInfo: () => void;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
 }
@@ -14,46 +15,57 @@ export default function Header({
   onToggleSettings,
   onClearChat,
   onExportChat,
+  onEditMetaInfo,
   isDarkMode,
   onToggleDarkMode
 }: HeaderProps) {
   return (
-    <div className="flex justify-between items-center p-4 border-b bg-white dark:bg-gray-800 dark:border-gray-700 shadow-sm">
-      <h1 className="text-xl font-bold dark:text-white bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">RAG Chatbot</h1>
-      <div className="flex items-center space-x-2">
+    <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+      <div className="flex items-center">
+        <h1 className="text-lg font-semibold text-gray-800 dark:text-white">ExpanRAG Chat</h1>
+      </div>
+      
+      <div className="flex items-center space-x-1">
+        <button
+          onClick={onEditMetaInfo}
+          className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+          aria-label="Edit context information"
+        >
+          <FileText className="w-5 h-5" />
+        </button>
+        
         <button
           onClick={onToggleSettings}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-          aria-label="Toggle settings"
+          className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+          aria-label="Settings"
         >
-          <Settings className="w-5 h-5 dark:text-white" />
+          <Settings className="w-5 h-5" />
         </button>
+        
         <button
           onClick={onClearChat}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+          className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
           aria-label="Clear chat"
         >
-          <Trash2 className="w-5 h-5 dark:text-white" />
+          <Trash className="w-5 h-5" />
         </button>
+        
         <button
           onClick={onExportChat}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+          className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
           aria-label="Export chat"
         >
-          <Download className="w-5 h-5 dark:text-white" />
+          <Download className="w-5 h-5" />
         </button>
+        
         <button
           onClick={onToggleDarkMode}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-          aria-label="Toggle dark mode"
+          className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+          aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
-          {isDarkMode ? (
-            <Sun className="w-5 h-5 text-white" />
-          ) : (
-            <Moon className="w-5 h-5" />
-          )}
+          {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
       </div>
-    </div>
+    </header>
   );
 } 

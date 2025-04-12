@@ -11,6 +11,8 @@ import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import ConversationList from './ConversationList';
 import FileUploader from './FileUploader';
+import MetaInformation from './MetaInformation';
+import MetaInformationModal from './MetaInformationModal';
 
 // Hooks
 import { useConversations } from '../hooks/useConversations';
@@ -38,9 +40,13 @@ export default function Chat() {
   const [temperature, setTemperature] = useState(0);
   const [topK, setTopK] = useState(3);
 
+  // New state for meta information editing
+  const [isEditingMetaInfo, setIsEditingMetaInfo] = useState(false);
+  const [showMetaInfoModal, setShowMetaInfoModal] = useState(false);
+
   // Custom hooks
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const { conversations, currentConversationId, currentConversation, setCurrentConversationId, createNewConversation, deleteConversation, addMessageToConversation, clearCurrentConversation } = useConversations();
+  const { conversations, currentConversationId, currentConversation, setCurrentConversationId, createNewConversation, deleteConversation, addMessageToConversation, clearCurrentConversation, updateConversationMetaInformation } = useConversations();
   const { uploadedFiles, isUploading, uploadFiles, deleteFile, deleteFileFromKnowledgeBase, updateFileCategory, categories } = useFileUpload();
   const { sendMessage, isLoading } = useChatApi();
 
@@ -57,6 +63,13 @@ export default function Chat() {
   const handleExportChat = () => {
     if (currentConversation?.messages) {
       exportChatAsJson(currentConversation.messages);
+    }
+  };
+
+  // Add this new function for handling meta information updates
+  const handleUpdateMetaInfo = (metaInfo: string) => {
+    if (currentConversationId) {
+      updateConversationMetaInformation(currentConversationId, metaInfo);
     }
   };
 
@@ -81,6 +94,7 @@ export default function Chat() {
         model: selectedModel,
         temperature,
         topK: topK,
+        metaInformation: currentConversation?.metaInformation,
         onSuccess: (assistantMessage) => {
           addMessageToConversation(currentConversationId, assistantMessage);
           scrollToBottom();
@@ -132,6 +146,14 @@ export default function Chat() {
           onToggleSettings={() => setShowSettings(!showSettings)}
           onClearChat={clearCurrentConversation}
           onExportChat={handleExportChat}
+          onEditMetaInfo={() => {
+            // If no messages, edit inline, otherwise show modal
+            if (currentConversation?.messages.length === 0) {
+              setIsEditingMetaInfo(true);
+            } else {
+              setShowMetaInfoModal(true);
+            }
+          }}
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleDarkMode}
         />
@@ -149,8 +171,26 @@ export default function Chat() {
           />
         )}
 
+        {/* Meta Information Modal for existing chats */}
+        <MetaInformationModal
+          isOpen={showMetaInfoModal}
+          onClose={() => setShowMetaInfoModal(false)}
+          value={currentConversation?.metaInformation || ''}
+          onSave={handleUpdateMetaInfo}
+        />
+
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-6 dark:bg-gray-900 scroll-smooth">
+          {/* Meta Information (only show if there are no messages or if editing) */}
+          {(currentConversation?.messages.length === 0 || isEditingMetaInfo) && currentConversationId && (
+            <MetaInformation 
+              value={currentConversation?.metaInformation || ''} 
+              onSave={handleUpdateMetaInfo}
+              isEditing={isEditingMetaInfo}
+              onToggleEdit={() => setIsEditingMetaInfo(!isEditingMetaInfo)}
+            />
+          )}
+          
           {currentConversation?.messages.map((message) => (
             <ChatMessage
               key={message.id}

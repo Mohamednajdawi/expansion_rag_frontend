@@ -24,8 +24,9 @@ import { useChatApi } from '../hooks/useChatApi';
 import { exportChatAsJson } from '../utils/exportUtils';
 
 const MODELS = [
-  { id: 'gpt-4o-mini', name: 'GPT-4 Mini' },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini' },
   { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
+  { id: 'gpt-4.1', name: 'gpt-4.1-mini-2025-04-14' },
 ];
 
 export default function Chat() {

@@ -37,9 +37,9 @@ export default function Chat() {
   const [showSettings, setShowSettings] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showUploadArea, setShowUploadArea] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
-  const [temperature, setTemperature] = useState(0);
-  const [topK, setTopK] = useState(3);
+  const [selectedModel, setSelectedModel] = useState(MODELS[2].id);
+  const [temperature, setTemperature] = useState(0.2);
+  const [topK, setTopK] = useState(5);
 
   // New state for meta information editing
   const [isEditingMetaInfo, setIsEditingMetaInfo] = useState(false);
